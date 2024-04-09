@@ -12,10 +12,10 @@ import numpy as np
 import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
+import pulp
 from pulp import LpVariable, LpProblem, LpMaximize, LpStatus, value
 import matplotlib.pyplot as plt
 from matplotlib import rc
-
 rc('text', usetex=True)
 rc('font', family='Palatino Linotype')
 
