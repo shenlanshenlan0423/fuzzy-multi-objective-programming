@@ -73,8 +73,9 @@ parser.add_argument('--beta_v2', type=float, default=0.2, help='Proportion of vi
 parser.add_argument('--x_max', type=int, default=2000, help='Maximum available truck')
 
 parser.add_argument('--epsilon', type=float, default=0.01, help='To determine the termination condition')
-parser.add_argument('--k', type=int, default=5, help='Max iteration')
-parser.add_argument('--flag', type=str, default='Solve', help='Solve or SensitivityAnalysis')
+parser.add_argument('--k', type=int, default=6, help='Max iteration')
+parser.add_argument('--flag', type=str, default='Solve', help='Solve, SensitivityAnalysis_beta_ms or SensitivityAnalysis_beta_v1')
+parser.add_argument('--solver', type=str, default='CBC', help='Solver configuration of pulp library')
 ```
 
 To perform sensitivity analysis for the problem, you can utilize the following statement to execute the program:
