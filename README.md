@@ -44,43 +44,45 @@ Traffic control scheme with government regulation
 |           C           |    *    | 10772.2 |   *    |    *    | 9371.77 |   *    |    *    | 9124.42 |    *    |    *    | 9348.07 |   *    |  *  | 163.52 |   *   |   *    |  38780   |
 |           V           |    *    |  1350   |   *    |    *    | 829.94  |   *    |    *    | 428.02  |    *    |    *    |  3.14   |   *    |  *  |   0    |   *   |   *    |  2611.1  |
 
-
-
 ## Example Usage
-
-For solve the problem, you can utilize the following statement to execute the program:
+- Before run this code, you should configure the path of solver in [script](src/model/MOP.py#L61). I also shared the file of glpsol solver: *winglpk-4.65.zip*.
+- For solving the problem, you can utilize the following statement to execute the program:
 ```
 python -um src.main
 ```
 All parameters involved in the model are listed below:
 ```
-parser.add_argument('--f_max', type=int, default=800, help='Traffic flow boundary')
-parser.add_argument('--c', type=int, default=5, help='Carrying capacity per vehicle')
-parser.add_argument('--c_p', type=int, default=1000, help='Procurement cost of per ton of relief materials')
-parser.add_argument('--c_tr', type=list, default=[100, 200, 200], help='Transportation cost per ton of each routes')
-parser.add_argument('--c_m', type=int, default=100, help='Medical service cost of per injured people')
-parser.add_argument('--c_v', type=int, default=100, help='Order maintaining cost of per unsatisfied recipient')
-parser.add_argument('--b_region22', type=float, default=2, help='Road damage coefficient, region 2 to 2')
-parser.add_argument('--b_region21', type=float, default=2.3, help='Road damage coefficient, region 2 to 1')
-parser.add_argument('--b_region11', type=float, default=2.5, help='Road damage coefficient, region 1 to 1')
-parser.add_argument('--mu', type=float, default=0.9, help='Over-saturated adjustment factor')
-parser.add_argument('--q', type=int, default=1, help='Each victim’s demand for total relief supplies is 1 ton')
-parser.add_argument('--e_m', type=int, default=2, help='Each injured victim is equipped with 1 doctor and 1 nurse')
-parser.add_argument('--n_g', type=float, default=0.1, help='Every 10 unsatisfied victims is equipped with 1 guard')
-parser.add_argument('--beta_ms', type=float, default=beta_ms, help='Proportion of serious injured recipients/victims')
-parser.add_argument('--beta_v1', type=float, default=beta_v1, help='Proportion of victims who feel unsatisfied')
-parser.add_argument('--beta_v2', type=float, default=0.2, help='Proportion of victims who feel satisfied')
-parser.add_argument('--x_max', type=int, default=2000, help='Maximum available truck')
+    parser = argparse.ArgumentParser(description="Specify Params for Experimental Settings")
+    parser.add_argument('--f_max', type=int, default=800, help='Traffic flow boundary')
+    parser.add_argument('--c', type=int, default=5, help='Carrying capacity per truck')
+    parser.add_argument('--c_p', type=int, default=1000, help='Procurement cost of per ton of relief materials')
+    parser.add_argument('--c_tr', type=list, default=[100, 200, 200], help='Transportation cost per ton of each routes')
+    parser.add_argument('--c_m', type=int, default=100, help='Medical service cost of per injured people')
+    parser.add_argument('--c_v', type=int, default=100, help='Order maintaining cost of per unsatisfied recipient')
+    parser.add_argument('--b_region22', type=float, default=2, help='Road damage coefficient, region 2 to 2')
+    parser.add_argument('--b_region21', type=float, default=2.3, help='Road damage coefficient, region 2 to 1')
+    parser.add_argument('--b_region11', type=float, default=2.5, help='Road damage coefficient, region 1 to 1')
+    parser.add_argument('--mu', type=float, default=0.9, help='Over-saturated adjustment factor')
+    parser.add_argument('--q', type=int, default=1, help='Each victim’s demand for total relief supplies is 1 ton')
+    parser.add_argument('--e_m', type=int, default=2, help='Each injured victim is equipped with 1 doctor and 1 nurse')
+    parser.add_argument('--n_g', type=float, default=0.1, help='Every 10 unsatisfied victims is equipped with 1 guard')
+    parser.add_argument('--beta_ms', type=float, default=beta_ms, help='Proportion of serious injured recipients')
+    parser.add_argument('--beta_v1', type=float, default=beta_v1, help='Proportion of victims who feel unsatisfied')
+    parser.add_argument('--beta_v2', type=float, default=0.2, help='Proportion of victims who feel satisfied')
+    parser.add_argument('--x_max', type=int, default=2000, help='Maximum available truck')
 
-parser.add_argument('--epsilon', type=float, default=0.01, help='To determine the termination condition')
-parser.add_argument('--k', type=int, default=6, help='Max iteration')
-parser.add_argument('--flag', type=str, default='Solve', help='Solve, SensitivityAnalysis_beta_ms or SensitivityAnalysis_beta_v1')
-parser.add_argument('--solver', type=str, default='CBC', help='Solver configuration of pulp library')
+    parser.add_argument('--epsilon', type=float, default=0.01, help='To determine the termination condition')
+    parser.add_argument('--K', type=int, default=5, help='Max iteration number')
+    parser.add_argument('--flag', type=str, default='Solve', help='Solve, SensitivityAnalysis_beta_ms or SensitivityAnalysis_beta_v1')
+    parser.add_argument('--solver', type=str, default='CBC', help='Solver configuration of pulp library')
+    args = parser.parse_args()
 ```
 
 To perform sensitivity analysis for the problem, you can utilize the following statement to execute the program:
 ```
 python -um src.SensitivityAnalysis
 ```
-
-For convenience, you can directly run the `src/main.py` or `src/SensitivityAnalysis.py`program to conduct the experiment.
+To perform time cost comparison of varying solvers, you can utilize the following statement to execute the program:
+```
+python -um src.SolverComparison
+```

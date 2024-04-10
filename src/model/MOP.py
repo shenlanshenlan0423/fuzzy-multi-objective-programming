@@ -15,12 +15,11 @@ class MOP:
                                 [2500, 2500, np.nan, 5000, 3000, np.nan, np.nan],
                                 [2500, 2500, 5000, np.nan, 3000, np.nan, 5000]])
         self.initial_demand = np.nansum(self.demand, axis=0)
-        # For calculating died people in each point
+        # For calculating died people in each demand point
         self.demand_ratio = self.initial_demand / self.initial_demand.sum()
         # The number of serious injured recipients is fixed
         self.serious_injured_recipients = self.initial_demand * args.beta_ms
-        # print(self.serious_injured_recipients)
-        self.died_demand = None
+        self.dead_crowd = None
         # Params
         self.mu = args.mu
         self.f_max = args.f_max
@@ -41,16 +40,16 @@ class MOP:
         self.b_region22 = args.b_region22
         self.epsilon = args.epsilon
 
-        self.k = args.k
+        self.K = args.K
         self.weights = weights
-        # NPO’s spontaneous relief scheme or Traffic control scheme with government regulation
+        # NPO’s spontaneous relief scheme or Traffic control scheme with government regulation policy
         self.policy = policy
-        # For computing equity objective V, update in iteration
+        # For calculating equity objective V, update in iteration
         self.last_U_list = [0 for _ in range(7)]
         self.last_U_underline = 0
         self.last_n = [0 for _ in range(7)]
         self.last_Q = [0 for _ in range(7)]
-        # Tables for saving the result
+        # Tables for saving results
         self.res_table1 = pd.DataFrame()
         self.res_table1['***'] = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7',
                                   'Total delivery', 'Truck delivery', 'Actual truck delivery']
@@ -61,12 +60,13 @@ class MOP:
 
     def get_solver(self, solver_name):
         if solver_name == 'CBC':
+            # Please replace the path of cbc.exe
             return pulp.COIN_CMD(path=r'D:\anaconda3\lib\site-packages\pulp\solverdir\cbc\win\64\cbc.exe')
         if solver_name == 'GLPK':
+            # Please replace the path of glpsol.exe
             return pulp.GLPK(path=r'D:\anaconda3\lib\site-packages\pulp\solverdir\glpk\w64\glpsol.exe')
-        if solver_name == 'CPLEX':
-            return pulp.CPLEX()
         if solver_name == 'GUROBI':
+            # Please install the gurobipy library in Python
             return pulp.GUROBI()
 
     def get_serious_injured_recipients(self, actual_delivery, k):
@@ -75,11 +75,11 @@ class MOP:
         # equation (2)
         S = min(actual_delivery, sum(self.serious_injured_recipients))
         if k == 1 and S <= sum(self.serious_injured_recipients):
-            # People with severe injuries whose needs were not met in the first tour died in the second tour
-            self.died_demand = (sum(self.serious_injured_recipients) - S) * self.demand_ratio
+            # People with severe injuries whose needs were not met in the first tour will die in the second tour
+            self.dead_crowd = (sum(self.serious_injured_recipients) - S) * self.demand_ratio
             self.serious_injured_recipients = np.array([0 for _ in range(7)])
         else:
-            self.died_demand = [0 for _ in range(7)]
+            self.dead_crowd = [0 for _ in range(7)]
         return S
 
     def get_order_maintaining_cost(self, n, Q, last_U):
@@ -126,19 +126,19 @@ class MOP:
         demand_with_route = np.nansum(self.demand, axis=1)
         demand_ratio = demand_with_route / demand_with_route.sum()
         # Dynamically adjust the distribution volume according to the remaining demand
-        # If the total demand exceeds the maximum number of available trucks
+        # whether the total demand exceeds the maximum number of available trucks
         if demand_with_route.sum() > self.x_max * self.c:
             TruckDelivery = self.x_max * demand_ratio
         else:
             TruckDelivery = demand_with_route.sum() / self.c * demand_ratio
         ActualTruckDelivery = np.array([self.get_actual_traffic(i) for i in TruckDelivery])
         TotalDelivery = ActualTruckDelivery * self.c
-        k_tour_delivery_table = np.vstack(
-            (demand_with_route, demand_ratio, TruckDelivery, ActualTruckDelivery, TotalDelivery))
+        k_tour_delivery_table = np.vstack((demand_with_route, demand_ratio, TruckDelivery,
+                                           ActualTruckDelivery, TotalDelivery))
         return np.hstack((k_tour_delivery_table, k_tour_delivery_table.sum(axis=1).reshape(-1, 1)))
 
     def initialize_prob(self, k_tour_delivery_table, demand, k):
-        # Instantiate the Max optimization problem
+        # Instantiate the Maximize optimization problem
         problem = LpProblem("MyProblem", LpMaximize)
         # define decision variables
         Q_21 = LpVariable("Q_21", lowBound=0)
@@ -152,7 +152,8 @@ class MOP:
         Q_16 = LpVariable("Q_16", lowBound=0)
         Q_37 = LpVariable("Q_37", lowBound=0)
 
-        # Define objective function: "Maximize cured serious injured recipients"
+        # Define objective function
+        # Maximize cured serious injured recipients
         S = self.get_serious_injured_recipients(actual_delivery=k_tour_delivery_table[4, -1], k=k)
         # A location with demand of 0 has U of 1
         U_m_list = [(Q_21 + Q_31) * (1 / demand[0]),
@@ -163,14 +164,13 @@ class MOP:
                     Q_16 * (1 / demand[5]),
                     Q_37 * (1 / demand[6])]
         non_zero_idx = np.where(np.array(demand) != 0)[0]
-        # "Maximize Satisfaction degree"
+        # Maximize Satisfaction degree
         U = sum([U_m_list[i] for i in non_zero_idx], 1 * (7 - len(non_zero_idx)))
-        # "Minimize Operation costs"
-        C = self.c_p * (Q_21 + Q_31 + Q_22 + Q_32 + Q_33 + Q_24 + Q_25 + Q_35 + Q_16 + Q_37) \
-            + sum(
-            self.c_tr * np.array([Q_16, Q_21 + Q_22 + Q_24 + Q_25, Q_31 + Q_32 + Q_33 + Q_35 + Q_37]) / self.c) \
+        # Minimize Operation costs
+        C = self.c_p * k_tour_delivery_table[4, 3] \
+            + sum(self.c_tr * k_tour_delivery_table[3, :3]) \
             + self.c_m * self.e_m * S
-        # "Minimize Order maintaining costs"
+        # Minimize Order maintaining costs
         V = self.get_order_maintaining_cost(n=demand[0], Q=Q_21 + Q_31, last_U=self.last_U_list[0]) + \
             self.get_order_maintaining_cost(n=demand[1], Q=Q_22 + Q_32, last_U=self.last_U_list[1]) + \
             self.get_order_maintaining_cost(n=demand[2], Q=Q_33, last_U=self.last_U_list[2]) + \
@@ -179,7 +179,7 @@ class MOP:
             self.get_order_maintaining_cost(n=demand[5], Q=Q_16, last_U=self.last_U_list[5]) + \
             self.get_order_maintaining_cost(n=demand[6], Q=Q_37, last_U=self.last_U_list[6])
 
-        # Capacity Constraint equation (3)
+        # Capacity Constraint, equation (3)
         problem += Q_16 == k_tour_delivery_table[4, 0]
         problem += Q_21 + Q_22 + Q_24 + Q_25 == k_tour_delivery_table[4, 1]
         problem += Q_31 + Q_32 + Q_33 + Q_35 + Q_37 == k_tour_delivery_table[4, 2]
@@ -219,8 +219,8 @@ class MOP:
     def solve(self):
         k = 1
         while 1:
-            # Terminating condition
-            if np.nansum(self.demand) < self.epsilon or k > self.k:
+            # Terminating condition, equation (16)
+            if np.nansum(self.demand) < self.epsilon or k > self.K:
                 break
             k_tour_delivery_table = self.get_k_tour_delivery_table()
             demand = np.nansum(self.demand, axis=0)
@@ -230,10 +230,12 @@ class MOP:
 
             # Solve problem
             status = problem.solve()
-            self.save_res(S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37, k_tour_delivery_table, demand, k)
+            self.save_res(S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37, k_tour_delivery_table,
+                          demand, k)
             k += 1
 
-    def save_res(self, S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37, k_tour_delivery_table, demand, k):
+    def save_res(self, S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37,
+                 k_tour_delivery_table, demand, k):
         omega = self.get_invulnerability(k_tour_delivery_table)
         # Table for saving result
         res_table = np.zeros((10, 3))
@@ -251,7 +253,7 @@ class MOP:
         res_table[4, 2] = value(Q_35)
         res_table[6, 2] = value(Q_37)
 
-        # update the demand table (Table.3)
+        # For calculating equity objective V, update in iteration
         self.last_U_list = [(value(Q_21) + value(Q_31)) * (1 / demand[0]),
                             + (value(Q_22) + value(Q_32)) * (1 / demand[1]),
                             + value(Q_33) * (1 / demand[2]),
@@ -263,15 +265,14 @@ class MOP:
         self.last_n = demand
         self.last_Q = res_table[:7, :].sum(axis=1)
 
-        unmet_demand = self.last_n - self.last_Q - self.died_demand
+        # update the demand table (Table.3)
+        unmet_demand = self.last_n - self.last_Q - self.dead_crowd
         new_demand = np.full((3, 7), np.nan)
         each_demand = unmet_demand / np.sum(~np.isnan(self.demand), axis=0)
         for col_idx in range(new_demand.shape[1]):
             initial_col = self.demand[:, col_idx]
             initial_col[~np.isnan(initial_col)] = each_demand[col_idx]
             new_demand[:, col_idx] = initial_col
-        # There can be no demand less than 0
-        new_demand[new_demand < 0] = 0
         self.demand = new_demand
 
         res_table[7, :] = k_tour_delivery_table[4, :-1]
@@ -288,7 +289,6 @@ class MOP:
         return self.res_table2
 
     def print_res(self):
-        # print("Status:", LpStatus[status])
         Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
         self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
         self.res_table1['Delivery'] = Delivery

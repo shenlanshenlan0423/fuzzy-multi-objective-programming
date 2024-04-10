@@ -9,7 +9,7 @@ from definitions import *
 from src.model.MOP import MOP
 
 
-class FMOP(MOP):
+class FMOP(MOP):  # Extend from the MOP class, override function of solve and print_res
     def __init__(self, args, policy, weights, objective_matrix):
         super().__init__(args, policy, weights)
         self.objective_matrix = objective_matrix
@@ -21,18 +21,19 @@ class FMOP(MOP):
         k = 1
         while 1:
             # Terminating condition
-            if np.nansum(self.demand) < self.epsilon or k > self.k:
+            if np.nansum(self.demand) < self.epsilon or k > self.K:
                 break
             k_tour_delivery_table = self.get_k_tour_delivery_table()
             demand = np.nansum(self.demand, axis=0)
             problem, S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37 = \
                 self.initialize_prob(k_tour_delivery_table, demand, k)
 
-            # additional decision variable
+            # Additional decision variable of FMOP
             lamb = LpVariable("lamb")
-            # define objective function
+            # Define FMOP objective function
             problem += lamb, "Maximize new objectives"
 
+            # Additional constraints of FMOP
             if self.delta[0] != 0:
                 problem += U - self.delta[0] * lamb >= self.objective_worst[0]
             if self.delta[1] != 0:
@@ -45,19 +46,19 @@ class FMOP(MOP):
             self.save_res(S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37, k_tour_delivery_table, demand, k)
             k += 1
 
-    # def print_res(self):
-    #     Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
-    #     self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
-    #     self.res_table1['Delivery'] = Delivery
-    #     print(self.res_table1.to_markdown(index=False))
-    #     self.res_table2['Total'] = self.res_table2.iloc[:, 1:].sum(axis=1)
-    #     print(self.res_table2.to_markdown(index=False))
+    def print_res(self):
+        Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
+        self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
+        self.res_table1['Delivery'] = Delivery
+        print(self.res_table1.to_markdown(index=False))
+        self.res_table2['Total'] = self.res_table2.iloc[:, 1:].sum(axis=1)
+        print(self.res_table2.to_markdown(index=False))
 
 
 def get_configs(beta_ms, beta_v1):
     parser = argparse.ArgumentParser(description="Specify Params for Experimental Settings")
     parser.add_argument('--f_max', type=int, default=800, help='Traffic flow boundary')
-    parser.add_argument('--c', type=int, default=5, help='Carrying capacity per vehicle')
+    parser.add_argument('--c', type=int, default=5, help='Carrying capacity per truck')
     parser.add_argument('--c_p', type=int, default=1000, help='Procurement cost of per ton of relief materials')
     parser.add_argument('--c_tr', type=list, default=[100, 200, 200], help='Transportation cost per ton of each routes')
     parser.add_argument('--c_m', type=int, default=100, help='Medical service cost of per injured people')
@@ -75,7 +76,7 @@ def get_configs(beta_ms, beta_v1):
     parser.add_argument('--x_max', type=int, default=2000, help='Maximum available truck')
 
     parser.add_argument('--epsilon', type=float, default=0.01, help='To determine the termination condition')
-    parser.add_argument('--k', type=int, default=6, help='Max iteration')
+    parser.add_argument('--K', type=int, default=5, help='Max iteration number')
     parser.add_argument('--flag', type=str, default='Solve', help='Solve, SensitivityAnalysis_beta_ms or SensitivityAnalysis_beta_v1')
     parser.add_argument('--solver', type=str, default='CBC', help='Solver configuration of pulp library')
     args = parser.parse_args()

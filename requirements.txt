@@ -5,3 +5,4 @@ numpy~=1.23.5
 matplotlib~=3.7.0
 pathlib~=1.0.1
 pulp~=2.8.0
+gurobipy~=11.0.1
