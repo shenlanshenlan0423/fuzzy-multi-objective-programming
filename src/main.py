@@ -111,12 +111,11 @@ if __name__ == '__main__':
         fmop.solve()
         res_list = fmop.get_metrics().tolist()
         beta_ms_arr = load_pickle(RESULT_DIR + '/beta_ms_arr.pickle')
-        # If the delivery is completed in less than 5 tours under some parameter Settings,
-        # it is completed to 5 tours for comparison
+        # If the delivery is completed in less than 5 tours under some parameter Settings, it is filed to 5 tours for comparison.
         if len(res_list) == 7:
             res_list.insert(3, 0)
             res_list.insert(4, 0)
-            res_list[-3] += 7  # For the policy that have been delivered in k-1 tour, the satisfaction is 1*7 in k tour
+            res_list[-3] += 7  # For the demand points that have been delivered in the k-1 tour, their satisfaction degree remains at 1 from the k-th period onwards.
         elif len(res_list) == 8:
             res_list.insert(4, 0)
             res_list[-3] += 7
