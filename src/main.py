@@ -84,7 +84,7 @@ def get_configs(beta_ms, beta_v1):
 
 
 if __name__ == '__main__':
-    args = get_configs(beta_ms=0.2, beta_v1=0.5)
+    args = get_configs(beta_ms=0.6, beta_v1=0.5)
     if args.flag == 'Solve':
         for policy in ['Spontaneous', 'GovernmentRegulation']:
             objective_matrix = []
@@ -111,14 +111,15 @@ if __name__ == '__main__':
         fmop.solve()
         res_list = fmop.get_metrics().tolist()
         beta_ms_arr = load_pickle(RESULT_DIR + '/beta_ms_arr.pickle')
-        # If the delivery is completed in less than 5 tours under some parameter Settings, it is filed to 5 tours for comparison.
-        if len(res_list) == 7:
+        # If the delivery is completed in less than 5 tours under some parameter Settings,
+        # it is completed to 5 tours for comparison
+        if len(res_list) == 7:  # The deliveries are completed in 3 tours
             res_list.insert(3, 0)
             res_list.insert(4, 0)
-            res_list[-3] += 7  # For the demand points that have been delivered in the k-1 tour, their satisfaction degree remains at 1 from the k-th period onwards.
-        elif len(res_list) == 8:
+            res_list[-3] += 7*2  # For the policy that have been delivered in k-1 tour, the satisfaction degree is 1*7 in k tour
+        elif len(res_list) == 8:  # The deliveries are completed in 4 tours
             res_list.insert(4, 0)
-            res_list[-3] += 7
+            res_list[-3] += 7*1
         beta_ms_arr.append(res_list)
         save_pickle(beta_ms_arr, RESULT_DIR + '/beta_ms_arr.pickle')
         pass

@@ -22,9 +22,9 @@ def run_varying_beta_v1(beta_v1s):
 
 if __name__ == '__main__':
     save_pickle([], RESULT_DIR + '/beta_ms_arr.pickle')
-    run_varying_beta_ms(beta_mses=[0.1, 0.2, 0.6])
+    run_varying_beta_ms(beta_mses=[0.05, 0.2, 0.6])
     beta_ms_arr = load_pickle(RESULT_DIR + '/beta_ms_arr.pickle')
-    beta_ms_table = np.hstack((np.array([0.1, 0.2, 0.6]).reshape(-1, 1), np.array(beta_ms_arr)))
+    beta_ms_table = np.hstack((np.array([0.05, 0.2, 0.6]).reshape(-1, 1), np.array(beta_ms_arr)))
     beta_ms_table = pd.DataFrame(beta_ms_table, columns=['Beta_ms', 'k1', 'k2', 'k3', 'k4', 'k5', 'S', 'U', 'C', 'V'])
     beta_ms_table.to_excel(TABLE_DIR + '/beta_ms_table.xlsx', index=False)
     print(beta_ms_table.to_markdown())

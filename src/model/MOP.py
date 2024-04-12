@@ -60,10 +60,11 @@ class MOP:
 
     def get_solver(self, solver_name):
         if solver_name == 'CBC':
-            # Please replace the path of cbc.exe
+            # Please replace the path of cbc.exe in your device
             return pulp.COIN_CMD(path=r'D:\anaconda3\lib\site-packages\pulp\solverdir\cbc\win\64\cbc.exe')
+            # return pulp.COIN_CMD(path=r'D:\Anaconda\lib\site-packages\pulp\solverdir\cbc\win\64\cbc.exe')
         if solver_name == 'GLPK':
-            # Please replace the path of glpsol.exe
+            # Please replace the path of glpsol.exe in your device
             return pulp.GLPK(path=r'D:\anaconda3\lib\site-packages\pulp\solverdir\glpk\w64\glpsol.exe')
         if solver_name == 'GUROBI':
             # Please install the gurobipy library in Python
