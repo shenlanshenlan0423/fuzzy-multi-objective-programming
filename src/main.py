@@ -46,13 +46,13 @@ class FMOP(MOP):  # Extend from the MOP class, override function of solve and pr
             self.save_res(S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37, k_tour_delivery_table, demand, k)
             k += 1
 
-    def print_res(self):
-        Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
-        self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
-        self.res_table1['Delivery'] = Delivery
-        print(self.res_table1.to_markdown(index=False))
-        self.res_table2['Total'] = self.res_table2.iloc[:, 1:].sum(axis=1)
-        print(self.res_table2.to_markdown(index=False))
+    # def print_res(self):
+    #     Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
+    #     self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
+    #     self.res_table1['Delivery'] = Delivery
+    #     print(self.res_table1.to_markdown(index=False))
+    #     self.res_table2['Total'] = self.res_table2.iloc[:, 1:].sum(axis=1)
+    #     print(self.res_table2.to_markdown(index=False))
 
 
 def get_configs(beta_ms, beta_v1):
@@ -84,7 +84,7 @@ def get_configs(beta_ms, beta_v1):
 
 
 if __name__ == '__main__':
-    args = get_configs(beta_ms=0.6, beta_v1=0.5)
+    args = get_configs(beta_ms=0.2, beta_v1=0.5)
     if args.flag == 'Solve':
         for policy in ['Spontaneous', 'GovernmentRegulation']:
             objective_matrix = []

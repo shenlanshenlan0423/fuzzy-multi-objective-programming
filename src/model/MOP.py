@@ -87,9 +87,9 @@ class MOP:
         # equation (9)
         unmet_demand = (n - Q * (1 / self.q))
         if last_U <= self.last_U_underline:
-            return self.c_v * self.beta_v1 * unmet_demand
+            return self.c_v * self.beta_v1 * unmet_demand * self.n_g
         else:
-            return self.c_v * self.beta_v2 * unmet_demand
+            return self.c_v * self.beta_v2 * unmet_demand * self.n_g
 
     def get_invulnerability(self, delivery_table):
         # equation (10)
