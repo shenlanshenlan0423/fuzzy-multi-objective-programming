@@ -46,13 +46,13 @@ class FMOP(MOP):  # Extend from the MOP class, override function of solve and pr
             self.save_res(S, U, C, V, Q_21, Q_31, Q_22, Q_32, Q_33, Q_24, Q_25, Q_35, Q_16, Q_37, k_tour_delivery_table, demand, k)
             k += 1
 
-    # def print_res(self):
-    #     Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
-    #     self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
-    #     self.res_table1['Delivery'] = Delivery
-    #     print(self.res_table1.to_markdown(index=False))
-    #     self.res_table2['Total'] = self.res_table2.iloc[:, 1:].sum(axis=1)
-    #     print(self.res_table2.to_markdown(index=False))
+    def print_res(self):
+        Delivery = self.res_table1.iloc[:, 1:].sum(axis=1)
+        self.res_table1['Demand'] = self.initial_demand.tolist() + ['*' for _ in range(3)]
+        self.res_table1['Delivery'] = Delivery
+        print(self.res_table1.to_markdown(index=False))
+        self.res_table2['Total'] = self.res_table2.iloc[:, 1:].sum(axis=1)
+        print(self.res_table2.to_markdown(index=False))
 
 
 def get_configs(beta_ms, beta_v1):
@@ -75,7 +75,7 @@ def get_configs(beta_ms, beta_v1):
     parser.add_argument('--beta_v2', type=float, default=0.2, help='Proportion of victims who feel satisfied')
     parser.add_argument('--x_max', type=int, default=2000, help='Maximum available truck')
 
-    parser.add_argument('--epsilon', type=float, default=0.01, help='To determine the termination condition')
+    parser.add_argument('--epsilon', type=float, default=0.0001, help='To determine the termination condition')
     parser.add_argument('--K', type=int, default=5, help='Max iteration number')
     parser.add_argument('--flag', type=str, default='Solve', help='Solve, SensitivityAnalysis_beta_ms or SensitivityAnalysis_beta_v1')
     parser.add_argument('--solver', type=str, default='CBC', help='Solver configuration of pulp library')
@@ -116,13 +116,10 @@ if __name__ == '__main__':
         if len(res_list) == 7:  # The deliveries are completed in 3 tours
             res_list.insert(3, 0)
             res_list.insert(4, 0)
-            res_list[-3] += 7*2  # For the policy that have been delivered in k-1 tour, the satisfaction degree is 1*7 in k tour
-        elif len(res_list) == 8:  # The deliveries are completed in 4 tours
-            res_list.insert(4, 0)
-            res_list[-3] += 7*1
+            # For the policy that have been delivered in k-1 tour, the satisfaction degree is 1*7 in k tour
+            res_list[-3] += 7*2
         beta_ms_arr.append(res_list)
         save_pickle(beta_ms_arr, RESULT_DIR + '/beta_ms_arr.pickle')
-        pass
 
     if args.flag == 'SensitivityAnalysis_beta_v1':
         for weights in [[0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]:

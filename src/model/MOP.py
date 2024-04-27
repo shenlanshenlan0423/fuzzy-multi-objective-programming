@@ -17,9 +17,10 @@ class MOP:
         self.initial_demand = np.nansum(self.demand, axis=0)
         # For calculating died people in each demand point
         self.demand_ratio = self.initial_demand / self.initial_demand.sum()
-        # The number of serious injured recipients is fixed
+        # Current serious injured recipients
         self.serious_injured_recipients = self.initial_demand * args.beta_ms
-        self.dead_crowd = None
+        self.dead_flag = False
+        self.dead_crowd = 0
         # Params
         self.mu = args.mu
         self.f_max = args.f_max
@@ -77,10 +78,9 @@ class MOP:
         S = min(actual_delivery, sum(self.serious_injured_recipients))
         if k == 1 and S <= sum(self.serious_injured_recipients):
             # People with severe injuries whose needs were not met in the first tour will die in the second tour
-            self.dead_crowd = (sum(self.serious_injured_recipients) - S) * self.demand_ratio
-            self.serious_injured_recipients = np.array([0 for _ in range(7)])
+            self.dead_flag = True
         else:
-            self.dead_crowd = [0 for _ in range(7)]
+            self.dead_flag = False
         return S
 
     def get_order_maintaining_cost(self, n, Q, last_U):
@@ -164,7 +164,7 @@ class MOP:
                     (Q_25 + Q_35) * (1 / demand[4]),
                     Q_16 * (1 / demand[5]),
                     Q_37 * (1 / demand[6])]
-        non_zero_idx = np.where(np.array(demand) != 0)[0]
+        non_zero_idx = np.where(np.array(demand) > self.epsilon)[0]  # considering the float error of Python
         # Maximize Satisfaction degree
         U = sum([U_m_list[i] for i in non_zero_idx], 1 * (7 - len(non_zero_idx)))
         # Minimize Operation costs
@@ -267,7 +267,15 @@ class MOP:
         self.last_Q = res_table[:7, :].sum(axis=1)
 
         # update the demand table (Table.3)
+        if self.dead_flag:
+            dead_crowd = self.serious_injured_recipients - self.last_Q
+            dead_crowd[dead_crowd < 0] = 0
+            self.dead_crowd = dead_crowd
+            # Update current serious injured recipients
+            self.serious_injured_recipients = np.array([0 for _ in range(7)])
         unmet_demand = self.last_n - self.last_Q - self.dead_crowd
+        self.dead_crowd = 0
+
         new_demand = np.full((3, 7), np.nan)
         each_demand = unmet_demand / np.sum(~np.isnan(self.demand), axis=0)
         for col_idx in range(new_demand.shape[1]):

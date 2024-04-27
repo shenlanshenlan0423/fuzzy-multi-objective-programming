@@ -10,6 +10,7 @@ import os
 import argparse
 import numpy as np
 import pandas as pd
+import random
 import warnings
 warnings.filterwarnings('ignore')
 import pulp
@@ -18,6 +19,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 rc('text', usetex=True)
 rc('font', family='Palatino Linotype')
+random.seed(0)
+np.random.seed(0)
 
 ROOT_DIR = str(Path(__file__).resolve().parents[0])
 SOURCE_DIR = ROOT_DIR + '/src/'

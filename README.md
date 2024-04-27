@@ -44,6 +44,9 @@ Traffic control scheme with government regulation
 |           C           |    *    | 10772.2 |   *    |    *    | 9371.77 |   *    |    *    | 9124.42 |    *    |    *    | 9348.07 |   *    |  *  | 163.52 |   *   |   *    |  38780   |
 |           V           |    *    |   135   |   *    |    *    |  82.99  |   *    |    *    |  42.8   |    *    |    *    |  0.31   |   *    |  *  |   0    |   *   |   *    |  261.1   |
 
+Process finished with exit code 0
+
+
 ## Example Usage
 - Before run this code, you should configure the path of solver in [script](src/model/MOP.py#L61). I also shared the file of glpsol solver: *winglpk-4.65.zip*.
 - For solving the problem, you can utilize the following statement to execute the program:
@@ -72,7 +75,6 @@ All parameters involved in the model are listed below:
     parser.add_argument('--x_max', type=int, default=2000, help='Maximum available truck')
 
     parser.add_argument('--epsilon', type=float, default=0.01, help='To determine the termination condition')
-    parser.add_argument('--K', type=int, default=5, help='Max iteration number')
     parser.add_argument('--flag', type=str, default='Solve', help='Solve, SensitivityAnalysis_beta_ms or SensitivityAnalysis_beta_v1')
     parser.add_argument('--solver', type=str, default='CBC', help='Solver configuration of pulp library')
     args = parser.parse_args()
