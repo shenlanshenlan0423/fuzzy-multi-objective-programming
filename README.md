@@ -4,7 +4,7 @@
 For a straight-forward use of this code, you can install the required libraries from *requirements.txt*: `pip install -r requirements.txt` 
 
 ## Experiment Result
-NPO’s spontaneous relief scheme
+### NPO’s spontaneous relief scheme
 
 |          ***          |   r1    |   r2    |   r3   |   r1    |   r2    |   r3    |   r1   |   r2    |   r3    |   r1   |   r2    |   r3    |   r1   |   r2    |   r3    | Demand | Delivery |
 |:---------------------:|:-------:|:-------:|:------:|:-------:|:-------:|:-------:|:------:|:-------:|:-------:|:------:|:-------:|:-------:|:------:|:-------:|:-------:|:------:|:--------:|
@@ -24,7 +24,7 @@ NPO’s spontaneous relief scheme
 |           C           |    *    | 9732.22 |   *    |    *    | 8056.49 |    *    |   *    | 7168.91 |    *    |   *    | 7478.28 |    *    |   *    | 6344.09 |    *    |   *    |  38780   |
 |           V           |    *    |   140   |   *    |    *    |  94.11  |    *    |   *    |  59.79  |    *    |   *    |  25.59  |    *    |   *    |    0    |    *    |   *    |  319.49  |
 
-Traffic control scheme with government regulation
+### Traffic control scheme with government regulation
 
 |          ***          |   r1    |   r2    |   r3   |   r1    |   r2    |   r3   |   r1    |   r2    |   r3    |   r1    |   r2    |   r3   | r1  |   r2   |  r3   | Demand | Delivery |
 |:---------------------:|:-------:|:-------:|:------:|:-------:|:-------:|:------:|:-------:|:-------:|:-------:|:-------:|:-------:|:------:|:---:|:------:|:-----:|:------:|:--------:|
@@ -44,11 +44,8 @@ Traffic control scheme with government regulation
 |           C           |    *    | 10772.2 |   *    |    *    | 9371.77 |   *    |    *    | 9124.42 |    *    |    *    | 9348.07 |   *    |  *  | 163.52 |   *   |   *    |  38780   |
 |           V           |    *    |   135   |   *    |    *    |  82.99  |   *    |    *    |  42.8   |    *    |    *    |  0.31   |   *    |  *  |   0    |   *   |   *    |  261.1   |
 
-Process finished with exit code 0
-
-
 ## Example Usage
-- Before run this code, you should configure the path of solver in [script](src/model/MOP.py#L61). I also shared the file of glpsol solver: *winglpk-4.65.zip*.
+- Before run this code, you should configure the path of solver in [script](src/model/MOP.py#L62). I also shared the file of GLPK solver: *winglpk-4.65.zip*.
 - For solving the problem, you can utilize the following statement to execute the program:
 ```
 python -um src.main
