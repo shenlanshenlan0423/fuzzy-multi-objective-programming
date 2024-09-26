@@ -85,3 +85,16 @@ To perform time cost comparison of varying solvers, you can utilize the followin
 ```
 python -um src.SolverComparison
 ```
+
+## Acknowledgement
+If you use code in this repository, we would be grateful if you would cite our research:
+```
+@article{chai2024fuzzy,
+  title={A fuzzy multi-objective programming model for the delivery and distribution of humanitarian relief materials},
+  author={Chai, Ruirui and He, Hongwei and Liu, Dehai and Chen, Jingfeng},
+  journal={Engineering Applications of Artificial Intelligence},
+  volume={137},
+  pages={109113},
+  year={2024},
+  publisher={Elsevier}
+}```
